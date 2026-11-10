@@ -302,11 +302,11 @@ export default function StudentProfile() {
                   <img
                     src={profile.profilePhoto?.url || profile.profilePhoto}
                     alt="Candidate Portrait"
-                    className="nb-profile-photo"
+                    className="np-profile-photo"
                     style={{ width: '120px', height: '120px' }}
                   />
                 ) : (
-                  <div className="nb-profile-photo-placeholder" style={{ width: '120px', height: '120px' }}>
+                  <div className="np-profile-photo-placeholder" style={{ width: '120px', height: '120px' }}>
                     {user?.name?.[0] || 'S'}
                   </div>
                 )}
@@ -527,7 +527,7 @@ export default function StudentProfile() {
                   Deposit Curriculum Vitae (PDF Only)
                 </label>
                 <div
-                  className="nb-file-upload"
+                  className="np-file-upload"
                   onClick={() => resumeRef.current?.click()}
                   style={{ border: '1px solid var(--dp-color-ink)' }}
                 >
@@ -546,7 +546,7 @@ export default function StudentProfile() {
                   Candidate Portrait Photograph
                 </label>
                 <div
-                  className="nb-file-upload"
+                  className="np-file-upload"
                   onClick={() => photoRef.current?.click()}
                   style={{ border: '1px solid var(--dp-color-ink)' }}
                 >

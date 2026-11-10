@@ -45,11 +45,9 @@ router.delete(
 );
 
 
-// Student
+// Student / Public available drives
 router.get(
     "/available-drives",
-    protect,
-    authorizeRoles("student","admin"),
     availableDrives
 );
 

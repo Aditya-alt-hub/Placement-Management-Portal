@@ -54,6 +54,6 @@ router.patch(
     approveCompany
 );
 
-router.get("/approved-company",protect,authorizeRoles("student"),getapprovedCompaniesByStudent);
+router.get("/approved-company", protect, authorizeRoles("student", "admin", "recruiter"), getapprovedCompaniesByStudent);
 
 export default router;

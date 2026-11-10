@@ -6,14 +6,17 @@ export default function ProtectedRoute({ children, role }) {
 
   if (loading) {
     return (
-      <div className="nb-loading">
-        <div className="nb-spinner" />
-        <span className="uppercase tracking-wider text-sm">Loading...</span>
+      <div className="main-content" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+        <div className="np-panel" style={{ textAlign: 'center', padding: '2rem 3rem' }}>
+          <p style={{ fontStyle: 'italic', fontSize: '1.05rem', margin: 0 }}>
+            Verifying registry credentials...
+          </p>
+        </div>
       </div>
     )
   }
 
-  if (!user) {
+  if (!user || !localStorage.getItem('token')) {
     return <Navigate to="/login" replace />
   }
 

@@ -38,10 +38,21 @@ export const register = async (req, res) => {
       role: role || "student",
     });
 
-    //send response to the client without password
+    //generate jwt token
+    const token = jwt.sign(
+      {
+        userId: user._id,
+        role: user.role,
+      },
+      process.env.SECRET_KEY,
+      { expiresIn: "2d" },
+    );
+
+    //send response to the client with token and without password
     return res.status(201).json({
       success: true,
       message: "User Registered Successfully",
+      token,
       user: {
         id: user._id,
         name: user.name,

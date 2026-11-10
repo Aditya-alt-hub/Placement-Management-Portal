@@ -126,8 +126,9 @@ export const getStudentProfile = async (req, res) => {
     }).populate("user", "name email role");
 
     if (!student) {
-      return res.status(404).json({
-        success: false,
+      return res.status(200).json({
+        success: true,
+        student: null,
         message: "Student profile not found",
       });
     }

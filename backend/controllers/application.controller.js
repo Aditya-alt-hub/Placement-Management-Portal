@@ -133,9 +133,10 @@ export const getMyApplication = async (req, res) => {
     });
 
     if (!student) {
-      return res.status(404).json({
-        success: false,
-        message: "Student profile not found.",
+      return res.status(200).json({
+        success: true,
+        count: 0,
+        applications: [],
       });
     }
     const applications = await Application.find({

@@ -153,9 +153,10 @@ export const getMyInterviews = async (req, res) => {
     });
 
     if (!studentProfile) {
-      return res.status(404).json({
-        success: false,
-        message: "Student profile not found",
+      return res.status(200).json({
+        success: true,
+        count: 0,
+        interviews: [],
       });
     }
 
