@@ -25,11 +25,23 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-const corsOptions = {
-  origin: ["https://placement-management-portal-nine.vercel.app"],
-  credentials: true,
-};
-app.use(cors(corsOptions));
+// const corsOptions = {
+//   origin: ["https://placement-management-portal-nine.vercel.app"],
+//   credentials: true,
+// };
+// app.use(cors(corsOptions));
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://placement-management-portal-nine.vercel.app",
+];
+
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+  }),
+);
 
 // Routes
 app.use("/api/auth", authRoutes);
