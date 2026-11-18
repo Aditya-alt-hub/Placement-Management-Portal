@@ -26,7 +26,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 const corsOptions = {
-  origin: ["https://placement-management-portal-nine.vercel.app/"],
+  origin: ["https://placement-management-portal-nine.vercel.app"],
   credentials: true,
 };
 app.use(cors(corsOptions));
