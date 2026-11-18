@@ -118,10 +118,11 @@ export default function AdminAnalytics() {
                 </thead>
                 <tbody>
                   {branchStats.map((b) => (
-                    <tr key={b._id}>
+                    // <tr key={b._id}>
+                    <tr key={b.branch}>
                       <td>
                         <strong style={{ fontFamily: 'var(--dp-typography-display)', fontSize: '1.05rem' }}>
-                          {b._id || 'General Faculty'}
+                          {b.branch || 'General Faculty'}
                         </strong>
                       </td>
                       <td>{b.totalStudents} candidates</td>
@@ -161,69 +162,93 @@ export default function AdminAnalytics() {
             </p>
           )}
         </div>
-      )}
+      )} 
+{/* Company Analytics Table */}
+{activeTab === 'companies' && (
+  <div className="np-panel" style={{ backgroundColor: '#ffffff' }}>
+    <div className="np-panel-header">
+      <h2>Enterprise Partner Placement Activity & Compensation</h2>
+    </div>
 
-      {/* Company Analytics Table */}
-      {activeTab === 'companies' && (
-        <div className="np-panel" style={{ backgroundColor: '#ffffff' }}>
-          <div className="np-panel-header">
-            <h2>Enterprise Partner Placement Activity & Compensation</h2>
-          </div>
+    {companyStats.length > 0 ? (
+      <div className="np-table-container">
+        <table className="np-table">
+          <thead>
+            <tr>
+              <th>Corporate Partner</th>
+              <th>Industry Sector</th>
+              <th>Drives Launched</th>
+              <th>Applications Evaluated</th>
+              <th>Offers Issued</th>
+              <th>Placed Candidates</th>
+              <th>Package Bracket</th>
+            </tr>
+          </thead>
 
-          {companyStats.length > 0 ? (
-            <div className="np-table-container">
-              <table className="np-table">
-                <thead>
-                  <tr>
-                    <th>Corporate Partner</th>
-                    <th>Industry Sector</th>
-                    <th>Drives Launched</th>
-                    <th>Applications Evaluated</th>
-                    <th>Offers Issued</th>
-                    <th>Placed Candidates</th>
-                    <th>Package Bracket</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {companyStats.map((c, idx) => {
-                    const cInfo = c._id || {}
-                    return (
-                      <tr key={cInfo.id || idx}>
-                        <td>
-                          <strong style={{ fontFamily: 'var(--dp-typography-display)', fontSize: '1.05rem' }}>
-                            {cInfo.name || 'Corporate Partner'}
-                          </strong>
-                        </td>
-                        <td>{cInfo.industry || 'Enterprise'}</td>
-                        <td>{c.totalDrives} drives</td>
-                        <td>{c.totalApplications} candidatures</td>
-                        <td>{c.totalOffers} offers</td>
-                        <td>
-                          <strong>{c.totalPlacedStudents}</strong> candidates
-                        </td>
-                        <td>
-                          <div>
-                            Avg: {c.averagePackage ? `₹${Number(c.averagePackage).toLocaleString('en-IN')}` : '—'}
-                          </div>
-                          {c.highestPackage && (
-                            <div style={{ fontSize: '0.8rem', color: 'var(--dp-color-accent)' }}>
-                              Max: ₹{Number(c.highestPackage).toLocaleString('en-IN')}
-                            </div>
-                          )}
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <p style={{ fontStyle: 'italic', color: 'var(--dp-color-secondary)', padding: '2rem 0', textAlign: 'center' }}>
-              No enterprise hiring metrics recorded on file.
-            </p>
-          )}
-        </div>
-      )}
+          <tbody>
+            {companyStats.map((c) => (
+              <tr key={c.companyId}>
+                <td>
+                  <strong
+                    style={{
+                      fontFamily: 'var(--dp-typography-display)',
+                      fontSize: '1.05rem',
+                    }}
+                  >
+                    {c.companyName || 'Unknown Company'}
+                  </strong>
+                </td>
+
+                <td>{c.industry || 'Not Specified'}</td>
+
+                <td>{c.totalDrives ?? 0} drives</td>
+
+                <td>{c.totalApplications ?? 0} applications</td>
+
+                <td>{c.totalOffersIssued ?? 0} offers</td>
+
+                <td>
+                  <strong>{c.totalPlacedStudents ?? 0}</strong> candidates
+                </td>
+
+                <td>
+                  <div>
+                    Avg: {c.averagePackage != null
+                      ? `₹${Number(c.averagePackage).toLocaleString('en-IN')}`
+                      : '—'}
+                  </div>
+
+                  {c.highestPackage != null && (
+                    <div
+                      style={{
+                        fontSize: '0.8rem',
+                        color: 'var(--dp-color-accent)',
+                      }}
+                    >
+                      Max: ₹{Number(c.highestPackage).toLocaleString('en-IN')}
+                    </div>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    ) : (
+      <p
+        style={{
+          fontStyle: 'italic',
+          color: 'var(--dp-color-secondary)',
+          padding: '2rem 0',
+          textAlign: 'center',
+        }}
+      >
+        No enterprise hiring metrics recorded on file.
+      </p>
+    )}
+  </div>
+)}
+
 
       {/* Graduation Batch Analytics */}
       {activeTab === 'batches' && (
@@ -247,10 +272,10 @@ export default function AdminAnalytics() {
                 </thead>
                 <tbody>
                   {batchStats.map((bt) => (
-                    <tr key={bt._id}>
+                    <tr key={bt.graduationYear}>
                       <td>
                         <strong style={{ fontFamily: 'var(--dp-typography-display)', fontSize: '1.1rem' }}>
-                          Class of {bt._id || 'Unknown Year'}
+                          {bt.graduationYear || 'Unknown Year'}
                         </strong>
                       </td>
                       <td>{bt.totalStudents} students</td>

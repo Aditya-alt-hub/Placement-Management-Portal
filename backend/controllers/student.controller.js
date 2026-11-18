@@ -121,6 +121,9 @@ export const createStudentProfile = async (req, res) => {
 
 export const getStudentProfile = async (req, res) => {
   try {
+    console.log("GET STUDENT PROFILE CONTROLLER HIT");
+    console.log("Authenticated user:", req.user?._id);
+    console.log("Authenticated role:", req.user?.role);
     const student = await StudentProfile.findOne({
       user: req.user._id,
     }).populate("user", "name email role");

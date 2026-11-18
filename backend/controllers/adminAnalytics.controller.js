@@ -135,31 +135,62 @@ export const getBranchAnalytics = async (req, res) => {
                 },
               },
             },
-            { $limit: 1 },
+            {
+              $project: {
+                package: "$offer.package",
+              },
+            },
           ],
           as: "acceptedOffers",
         },
       },
+
       {
         $group: {
           _id: { $ifNull: ["$branch", "Unknown"] },
-          totalStudents: { $sum: 1 },
+
+          totalStudents: {
+            $sum: 1,
+          },
+
           placedStudents: {
             $sum: {
               $cond: [{ $gt: [{ $size: "$acceptedOffers" }, 0] }, 1, 0],
             },
           },
+
+          packageLists: {
+            $push: "$acceptedOffers.package",
+          },
         },
       },
+
+      // Flatten all accepted offer packages for this branch
+      {
+        $addFields: {
+          allPackages: {
+            $reduce: {
+              input: "$packageLists",
+              initialValue: [],
+              in: {
+                $concatArrays: ["$$value", "$$this"],
+              },
+            },
+          },
+        },
+      },
+
       {
         $project: {
           _id: 0,
           branch: "$_id",
           totalStudents: 1,
           placedStudents: 1,
+
           notPlacedStudents: {
             $subtract: ["$totalStudents", "$placedStudents"],
           },
+
           placementRate: {
             $round: [
               {
@@ -173,9 +204,22 @@ export const getBranchAnalytics = async (req, res) => {
               2,
             ],
           },
+
+          averagePackage: {
+            $round: [{ $ifNull: [{ $avg: "$allPackages" }, 0] }, 2],
+          },
+
+          highestPackage: {
+            $ifNull: [{ $max: "$allPackages" }, 0],
+          },
         },
       },
-      { $sort: { placementRate: -1 } },
+
+      {
+        $sort: {
+          placementRate: -1,
+        },
+      },
     ]);
 
     return res.status(200).json({
@@ -196,86 +240,161 @@ export const getBranchAnalytics = async (req, res) => {
 //company-wise placement analytics
 export const getCompanyAnalytics = async (req, res) => {
   try {
-    const companyStats = await PlacementDrive.aggregate([
+    const companyStats = await Company.aggregate([
+      // Get all placement drives belonging to each company
       {
         $lookup: {
-          from: "applications",
-          let: { driveId: "$_id" },
+          from: "placementdrives",
+          let: { companyId: "$_id" },
           pipeline: [
             {
               $match: {
                 $expr: {
-                  $and: [
-                    { $eq: ["$drive", "$$driveId"] },
-                    { $eq: ["$offer.status", "Accepted"] },
-                  ],
+                  $eq: ["$company", "$$companyId"],
                 },
               },
             },
             {
-              $project: {
-                student: 1,
-                package: "$offer.package",
+              $project: { _id: 1 },
+            },
+          ],
+          as: "drives",
+        },
+      },
+
+      // Extract drive IDs
+      {
+        $set: {
+          driveIds: {
+            $map: {
+              input: "$drives",
+              as: "drive",
+              in: "$$drive._id",
+            },
+          },
+        },
+      },
+
+      // Get applications for those drives
+      {
+        $lookup: {
+          from: "applications",
+          let: { driveIds: "$driveIds" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $in: ["$drive", "$$driveIds"],
+                },
               },
             },
           ],
-          as: "acceptedApplications",
+          as: "applications",
         },
       },
+
+      // Separate accepted offers from all issued offers
       {
-        $unwind: "$acceptedApplications",
-      },
-      {
-        $group: {
-          _id: "$company",
-          students: {
-            $addToSet: "$acceptedApplications.student",
+        $set: {
+          acceptedApplications: {
+            $filter: {
+              input: "$applications",
+              as: "app",
+              cond: {
+                $eq: ["$$app.offer.status", "Accepted"],
+              },
+            },
           },
-          totalAcceptedOffers: {
-            $sum: 1,
-          },
-          averagePackage: {
-            $avg: "$acceptedApplications.package",
-          },
-          highestPackage: {
-            $max: "$acceptedApplications.package",
-          },
-          lowestPackage: {
-            $min: "$acceptedApplications.package",
+
+          issuedApplications: {
+            $filter: {
+              input: "$applications",
+              as: "app",
+              cond: {
+                $in: [
+                  "$$app.offer.status",
+                  ["Offered", "Accepted", "Declined", "Withdrawn"],
+                ],
+              },
+            },
           },
         },
       },
-      {
-        $lookup: {
-          from: "companies",
-          localField: "_id",
-          foreignField: "_id",
-          as: "company",
-        },
-      },
-      {
-        $unwind: "$company",
-      },
+
+      // Calculate analytics
       {
         $project: {
           _id: 0,
-          companyId: "$company._id",
-          companyName: "$company.name",
+          companyId: "$_id",
+          companyName: "$name",
+          industry: {
+            $ifNull: ["$industry", "Not Specified"],
+          },
+
+          totalDrives: {
+            $size: "$drives",
+          },
+
+          totalApplications: {
+            $size: "$applications",
+          },
+
+          totalOffersIssued: {
+            $size: "$issuedApplications",
+          },
+
           totalPlacedStudents: {
-            $size: "$students",
+            $size: {
+              $setUnion: [
+                {
+                  $map: {
+                    input: "$acceptedApplications",
+                    as: "app",
+                    in: "$$app.student",
+                  },
+                },
+                [],
+              ],
+            },
           },
-          totalAcceptedOffers: 1,
+
           averagePackage: {
-            $round: [{ $ifNull: ["$averagePackage", 0] }, 2],
+            $round: [
+              {
+                $avg: {
+                  $map: {
+                    input: "$acceptedApplications",
+                    as: "app",
+                    in: "$$app.offer.package",
+                  },
+                },
+              },
+              2,
+            ],
           },
+
           highestPackage: {
-            $ifNull: ["$highestPackage", 0],
+            $max: {
+              $map: {
+                input: "$acceptedApplications",
+                as: "app",
+                in: "$$app.offer.package",
+              },
+            },
           },
+
           lowestPackage: {
-            $ifNull: ["$lowestPackage", 0],
+            $min: {
+              $map: {
+                input: "$acceptedApplications",
+                as: "app",
+                in: "$$app.offer.package",
+              },
+            },
           },
         },
       },
+
       {
         $sort: {
           totalPlacedStudents: -1,
@@ -323,9 +442,9 @@ export const getBatchAnalytics = async (req, res) => {
                 "offer.respondedAt": -1,
               },
             },
-            {
-              $limit: 1,
-            },
+            // {
+            //   $limit: 1,
+            // },
             {
               $project: {
                 package: "$offer.package",
@@ -352,9 +471,15 @@ export const getBatchAnalytics = async (req, res) => {
             $sum: 1,
           },
 
+          // placedStudents: {
+          //   $sum: {
+          //     $cond: [{ $ne: ["$acceptedOffer", null] }, 1, 0],
+          //   },
+          // },
+
           placedStudents: {
             $sum: {
-              $cond: [{ $ne: ["$acceptedOffer", null] }, 1, 0],
+              $cond: [{ $gt: [{ $size: "$acceptedOffers" }, 0] }, 1, 0],
             },
           },
 

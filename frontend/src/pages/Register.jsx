@@ -38,11 +38,13 @@ export default function Register() {
 
     setLoading(true)
     try {
-      const user = await register(form.name, form.email, form.password, form.role)
-      if (user.role === 'student') navigate('/student/dashboard')
-      else if (user.role === 'recruiter') navigate('/recruiter/dashboard')
-      else if (user.role === 'admin') navigate('/admin/dashboard')
-      else navigate('/')
+      // const user = await register(form.name, form.email, form.password, form.role)
+      await register(form.name, form.email, form.password, form.role)
+      // if (user.role === 'student') navigate('/student/dashboard')
+      // else if (user.role === 'recruiter') navigate('/recruiter/dashboard')
+      // else if (user.role === 'admin') navigate('/admin/dashboard') 
+      // else navigate('/')
+      navigate('/login', { replace: true })
     } catch (err) {
       setError(err?.response?.data?.message || 'Registration failed. Please check your data.')
     } finally {

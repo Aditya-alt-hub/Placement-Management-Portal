@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import api from '../../api/axios'
 import Badge from '../../components/ui/Badge'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 export default function AIAnalysis() {
   const [analysis, setAnalysis] = useState(null)
@@ -136,7 +138,7 @@ export default function AIAnalysis() {
                 )}
 
                 {/* Answer Narrative */}
-                {analysis.answer ? (
+                {/* {analysis.answer ? (
                   <div
                     style={{
                       fontFamily: 'var(--dp-typography-reading)',
@@ -153,7 +155,95 @@ export default function AIAnalysis() {
                   <div style={{ fontStyle: 'italic', color: 'var(--dp-color-secondary)' }}>
                     Evaluation complete.
                   </div>
-                )}
+                )} */}
+                {/* Answer Narrative */}
+                {analysis.answer ? (
+  <div
+    style={{
+      fontFamily: 'var(--dp-typography-reading)',
+      fontSize: '1.05rem',
+      lineHeight: 1.7,
+      backgroundColor: 'transparent',
+      padding: '0.5rem 0',
+      overflowWrap: 'anywhere',
+    }}
+  >
+    <ReactMarkdown
+      remarkPlugins={[remarkGfm]}
+      components={{
+        h1: ({ children }) => (
+          <h1 style={{ fontSize: '1.6rem', margin: '1.2rem 0 0.7rem' }}>
+            {children}
+          </h1>
+        ),
+        h2: ({ children }) => (
+          <h2 style={{ fontSize: '1.35rem', margin: '1.2rem 0 0.7rem' }}>
+            {children}
+          </h2>
+        ),
+        h3: ({ children }) => (
+          <h3 style={{ fontSize: '1.15rem', margin: '1rem 0 0.5rem' }}>
+            {children}
+          </h3>
+        ),
+        p: ({ children }) => (
+          <p style={{ margin: '0.65rem 0' }}>{children}</p>
+        ),
+        table: ({ children }) => (
+          <div style={{ overflowX: 'auto', margin: '1rem 0' }}>
+            <table
+              style={{
+                width: '100%',
+                borderCollapse: 'collapse',
+                fontSize: '0.9rem',
+              }}
+            >
+              {children}
+            </table>
+          </div>
+        ),
+        th: ({ children }) => (
+          <th
+            style={{
+              border: '1px solid #ddd',
+              padding: '0.7rem',
+              backgroundColor: '#f3f1eb',
+              textAlign: 'left',
+            }}
+          >
+            {children}
+          </th>
+        ),
+        td: ({ children }) => (
+          <td
+            style={{
+              border: '1px solid #ddd',
+              padding: '0.7rem',
+              textAlign: 'left',
+            }}
+          >
+            {children}
+          </td>
+        ),
+        li: ({ children }) => (
+          <li style={{ marginBottom: '0.4rem' }}>{children}</li>
+        ),
+        strong: ({ children }) => (
+          <strong style={{ fontWeight: 700 }}>
+            {children}
+          </strong>
+        ),
+      }}
+    >
+      {String(analysis.answer).replace(/<br\s*\/?>/gi, '\n')}
+    </ReactMarkdown>
+  </div>
+) : (
+  <div style={{ fontStyle: 'italic', color: 'var(--dp-color-secondary)' }}>
+    Evaluation complete.
+  </div>
+)}
+
               </div>
             )}
           </article>
